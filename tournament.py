@@ -70,7 +70,8 @@ def playerStandings():
     """
     db = connect()
     c = db.cursor()
-    c.execute("SELECT id, name, player_wins as wins, player_matches as matches FROM player_standings;")
+    c.execute("SELECT id, name, player_wins as wins, player_matches as matches"
+              "FROM player_standings;")
     rows = c.fetchall()
     db.close()
     return rows
@@ -85,9 +86,11 @@ def reportMatch(winner, loser):
     """
     db = connect()
     c = db.cursor()
-    c.execute("INSERT INTO matches (winner, loser) VALUES(%s,%s);", (winner, loser))
+    c.execute("INSERT INTO matches (winner, loser) VALUES(%s,%s);", (winner,
+                                                                     loser))
     db.commit()
     db.close()
+
 
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
@@ -104,5 +107,22 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
+    db = connect()
+    c = db.cursor()
+    c.execute("SELECT id, name FROM player_standings;")
+    rows = c.fetchall()
+    db.close()
 
-
+    pairings = []  # create final pairing list
+    i = 0
+    for row in rows:
+        if i % 2 == 0:  # first of pairs
+            pair = []
+            pair.append(row[0])
+            pair.append(row[1])
+        else:  # 2nd of pairs
+            pair.append(row[0])
+            pair.append(row[1])
+            pairings.append(tuple(pair))  # add to final list
+        i += 1
+    return pairings
